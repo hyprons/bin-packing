@@ -19,50 +19,59 @@ def compute_rotation(dim: list[float], rot: tuple[int, int, int]) -> list[float]
 
 def compute_item_count(box_dim: list[float], item_dim: list[float], branch: int) -> int:
     global rotations
-    global rotations_b
+    # global rotations_s
 
-    item_space = [
+    # dimensions of items that fit with item quantity as unit
+    item_count = [
         box_dim[0] // item_dim[0],
         box_dim[1] // item_dim[1],
         box_dim[2] // item_dim[2],
     ]
 
-    diffs = [box_dim[i] - item_dim[i] * item_space[i] for i in range(0, 3)]
+    # comput leftover space
+    diffs = [box_dim[i] - item_dim[i] * item_count[i] for i in range(0, 3)]
+    # greedily let z cut out the volume, then x then y
     splits = [
         [diffs[2], box_dim[0], box_dim[1]],
-        [diffs[0], (item_space[2] * item_dim[2]), box_dim[1]],
-        [diffs[1], (item_space[0] * item_dim[0]), (item_space[2] * item_dim[2])],
+        [diffs[0], (item_count[2] * item_dim[2]), box_dim[1]],
+        [diffs[1], (item_count[0] * item_dim[0]),
+         (item_count[2] * item_dim[2])],
     ]
 
-    count = int(item_space[0] * item_space[1] * item_space[2])
+    count = int(item_count[0] * item_count[1] * item_count[2])
 
     best_count_total = 0
 
     for i in splits:
         best_count = 0
-        sub_box_vol = i[0] * i[1] * i[2]
+        sub_box_vol = i[0] * i[1] * i[2]  # compute split volume
         if sub_box_vol > 0:
             for j in rotations:
                 rot_dim = compute_rotation(item_dim, j)
-                c = i[0] // rot_dim[0] * i[1] // rot_dim[1] * i[2] // rot_dim[2]
+                c = (
+                    (i[0] // rot_dim[0]) *
+                    (i[1] // rot_dim[1]) * (i[2] // rot_dim[2])
+                )  # pre-compute item count
                 if c > 0:
                     print(
-                        f"Split {i} found at depth {branch} with rotation {j}! {c} items can fit."
+                        f"Split {i} found at depth {
+                            branch} with rotation {j}! {c} items can fit."
                     )
+                    print(f"presplit: {box_vol}, postsplit: {sub_box_vol}")
+                    # recurse a branch deeper
                     count_split = compute_item_count(
                         i, compute_rotation(item_dim, j), branch + 1
                     )
                     if count_split > best_count:
                         best_count = count_split
         best_count_total += best_count
-    # mark shared space, if unused by one split, allocate to the other
     count += best_count_total
 
     return count
 
 
 rotations = [(0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1)]
-rotations_b = [(0, 0, 0)]
+rotations_s = [(0, 0, 0)]  # for testing single rotation runs
 
 box_dim = [float(i) for i in input("box dimension (x,y,z): ").split(",")]
 box_vol = box_dim[0] * box_dim[1] * box_dim[2]
@@ -92,6 +101,7 @@ for i in rotations:
         best_count = item_count
 # TODO: prioritize answers with the least amount of branches
 print(
-    f"The most efficient rotation is x:{best_rotation[0] * 90}, y:{best_rotation[1] * 90}, z:{best_rotation[2] * 90} with an effiency of {best_eff}%"
+    f"The most efficient rotation is x:{best_rotation[0] * 90}, y:{
+        best_rotation[1] * 90}, z:{best_rotation[2] * 90} with an effiency of {best_eff}%"
 )
 print(f"It could fit a max of {best_count} items")
