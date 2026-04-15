@@ -30,6 +30,11 @@ def compute_item_count(box_dim: list[float], item_dim: list[float], branch: int)
 
     print(item_count, box_dim, item_dim)
 
+    # TODO: add non greedy alternative for maximizing possible items
+    # for x_has_z; for y_has_z; for x_has_y; 2^3 = 8 possiblities
+    # to split the overlapping space, iterate over these
+    # https://prnt.sc/08r7MAN7oLI3
+
     # comput leftover space
     diffs = [box_dim[i] - item_dim[i] * item_count[i] for i in range(0, 3)]
     # greedily let z cut out the volume, then x then y
