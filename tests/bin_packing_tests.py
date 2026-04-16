@@ -1,6 +1,7 @@
 import unittest
+from unittest.mock import patch
 
-from bin_packing import compute_rotation
+from bin_packing import compute_rotation, request_dim_input
 
 
 class RotationTests(unittest.TestCase):
@@ -24,3 +25,19 @@ class RotationTests(unittest.TestCase):
                 print(dim[i], new_rot[pre_computed_rotations[idx][i]], new_rot, rot)
                 # check whether the rotation is at the right place after transforming
                 assert dim[i] == new_rot[pre_computed_rotations[idx][i]]
+
+
+class DimensionInputTests(unittest.TestCase):
+    @patch("builtins.input", return_value="5,5,5")
+    def test_input(self, _):
+        (dim, vol) = request_dim_input("")
+
+        assert vol == 125
+        assert dim == [5, 5, 5]
+
+    @patch("builtins.input", side_effect=["test,invalid", "16,25,9"])
+    def test_with_invalid_input(self, _):
+        (dim, vol) = request_dim_input("")
+
+        assert vol == 3600
+        assert dim == [16, 25, 9]

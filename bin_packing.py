@@ -1,3 +1,20 @@
+def request_dim_input(name: str) -> tuple[list, float]:
+    dim = [0, 0, 0]
+
+    error = False
+    while dim[0] <= 0 or dim[1] <= 0 or dim[2] <= 0 or error:
+        error = False
+        try:
+            print("Invalid input, try again!")
+            dim = [float(i) for i in input(f"{name} dimension (x,y,z): ").split(",")]
+        except Exception:
+            error = True
+
+    vol = dim[0] * dim[1] * dim[2]
+
+    return (dim, vol)
+
+
 def compute_rotation(dim: list[float], rot: tuple[int, int, int]) -> list[float]:
     dim_new = dim.copy()
 
@@ -80,18 +97,8 @@ if __name__ == "__main__":
     rotations = [(0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1)]
     rotations_s = [(0, 0, 0)]  # for testing single rotation runs
 
-    box_dim = [float(i) for i in input("box dimension (x,y,z): ").split(",")]
-    while box_dim[0] <= 0 or box_dim[1] <= 0 or box_dim[2] <= 0:
-        print("Invlalid input, try again!")
-        box_dim = [float(i) for i in input("box dimension (x,y,z): ").split(",")]
-
-    box_vol = box_dim[0] * box_dim[1] * box_dim[2]
-
-    item_dim = [float(i) for i in input("item dimension (x,y,z): ").split(",")]
-    while item_dim[0] <= 0 or item_dim[1] <= 0 or item_dim[2] <= 0:
-        print("Invlalid input, try again!")
-        item_dim = [float(i) for i in input("item dimension (x,y,z): ").split(",")]
-    item_vol = item_dim[0] * item_dim[1] * item_dim[2]
+    (box_dim, box_vol) = request_dim_input("box")
+    (item_dim, item_vol) = request_dim_input("item")
 
     max_count = box_vol // item_vol
     if max_count > 0:
